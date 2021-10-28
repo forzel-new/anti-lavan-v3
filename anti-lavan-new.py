@@ -59,7 +59,7 @@ async def rename_roles(ctx):
         except:
             print(f'[ ERROR ] Не смог изменить имя роли {oldrole} на сервере {ctx.guild.name}')
         else:
-            print(f'[ LOG ] {oldrole} --> #{rolename}')
+            print(f'[ LOG ] {oldrole} --> {rolename}')
 
 @client.command()
 async def deop_roles(ctx):

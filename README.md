@@ -6,7 +6,7 @@
 
 Запускаем, устанавливаем. ВНИМАНИЕ! ПРИ УСТАНОВКЕ ОБЯЗАТЕЛЬНО СТАВЬТЕ ГАЛОЧКУ "Add Python to PATCH"!!! 
 
-После установки открываем командную строку (win+r -> cmd) и пишем эти команды: pip install discord , pip install colorama , pip install asyncio 
+После установки открываем командную строку (win+r -> cmd) и пишем эти команды: pip install discord , pip install colorama , pip install asyncio , pip install requests
 
 После установки этих модулей открываем именно .bat файл, вас просит префикс и токен. Создаем тут - https://discord.com/developers бота, и при создании в разделе bot поставь галочки "members intents" и "presence intents" 
 

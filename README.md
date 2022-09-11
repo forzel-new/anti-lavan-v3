@@ -8,7 +8,8 @@
 
 После установки открываем командную строку (win+r -> cmd) и пишем эти команды:
 ```
-pip install discord
+pip install discord==1.7.3
+pip install discord.py==1.7.3
 pip install asyncio
 pip install requests
 pip install colorama

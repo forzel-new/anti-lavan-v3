@@ -35,16 +35,12 @@ echo = input('Показать ли список изменений ( да / н�
 if 'да' in str(echo.lower()):
     print(Fore.GREEN)
     print(updates + '\n')
-else:
-    pass
 
 channelname = 'Crash By Anti-Lavan'
 rolename = 'Crashed By Anti-Lavan'
 reasonb = 'Сервер крашнут ботом Anti-Lavan'
 
-intents = discord.Intents.default()
-intents.members = True
-client = commands.Bot(command_prefix=prefix, intents=intents)
+client = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
 client.remove_command('help') # удаляем встроенную команду хелпа
 
 @client.event
